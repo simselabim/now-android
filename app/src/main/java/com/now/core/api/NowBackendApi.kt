@@ -12,7 +12,7 @@ class NowBackendApi(
     private val environment: ApiEnvironment,
     private val tokenStore: AuthTokenStore
 ) {
-    suspend fun register(email: String, password: String): AuthSession {
+    fun register(email: String, password: String): AuthSession {
         val response = request(
             method = "POST",
             path = "/auth/register",
@@ -22,7 +22,7 @@ class NowBackendApi(
         return response.toAuthSession().also { tokenStore.accessToken = it.accessToken }
     }
 
-    suspend fun login(email: String, password: String): AuthSession {
+    fun login(email: String, password: String): AuthSession {
         val response = request(
             method = "POST",
             path = "/auth/login",
@@ -32,10 +32,10 @@ class NowBackendApi(
         return response.toAuthSession().also { tokenStore.accessToken = it.accessToken }
     }
 
-    suspend fun bootstrap(): BootstrapSnapshot =
+    fun bootstrap(): BootstrapSnapshot =
         request(method = "GET", path = "/app/bootstrap").toBootstrapSnapshot()
 
-    suspend fun updateProfile(
+    fun updateProfile(
         displayName: String,
         birthDate: String,
         gender: String,
@@ -53,7 +53,7 @@ class NowBackendApi(
                 .put("interests", JSONArray(interests))
         ).toProfile()
 
-    suspend fun createUploadIntent(kind: String, contentType: String, fileSizeBytes: Int): UploadIntent =
+    fun createUploadIntent(kind: String, contentType: String, fileSizeBytes: Int): UploadIntent =
         request(
             method = "POST",
             path = "/media/upload-intent",
@@ -63,7 +63,7 @@ class NowBackendApi(
                 .put("file_size_bytes", fileSizeBytes)
         ).toUploadIntent()
 
-    suspend fun uploadBytes(uploadIntent: UploadIntent, bytes: ByteArray, contentType: String) {
+    fun uploadBytes(uploadIntent: UploadIntent, bytes: ByteArray, contentType: String) {
         val connection = URL(uploadIntent.uploadUrl).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = uploadIntent.method
@@ -84,7 +84,7 @@ class NowBackendApi(
         }
     }
 
-    suspend fun uploadPhoto(storageKey: String, position: Int, isMain: Boolean): BackendPhoto =
+    fun uploadPhoto(storageKey: String, position: Int, isMain: Boolean): BackendPhoto =
         request(
             method = "POST",
             path = "/profiles/me/photos",
@@ -94,7 +94,7 @@ class NowBackendApi(
                 .put("is_main", isMain)
         ).getJSONObject("photo").toPhoto()
 
-    suspend fun updateTodayIntent(plan: String, intent: String, timeToday: String): BackendTodayIntent =
+    fun updateTodayIntent(plan: String, intent: String, timeToday: String): BackendTodayIntent =
         request(
             method = "PUT",
             path = "/today-intent",
@@ -104,35 +104,35 @@ class NowBackendApi(
                 .put("time_today", timeToday)
         ).toTodayIntent()
 
-    suspend fun goOnline(latitude: Double, longitude: Double, accuracyMeters: Int?): BackendOnlineSession {
+    fun goOnline(latitude: Double, longitude: Double, accuracyMeters: Int?): BackendOnlineSession {
         val body = JSONObject().put("lat", latitude).put("lng", longitude)
         if (accuracyMeters != null) body.put("accuracy_m", accuracyMeters)
         return request(method = "POST", path = "/online", body = body).getJSONObject("session").toOnlineSession()
     }
 
-    suspend fun goOffline() {
+    fun goOffline() {
         request(method = "DELETE", path = "/online")
     }
 
-    suspend fun discoverMap(radiusMeters: Int = 2000): DiscoveryMapSnapshot =
+    fun discoverMap(radiusMeters: Int = 2000): DiscoveryMapSnapshot =
         request(method = "GET", path = "/discover/map?radius_m=$radiusMeters").toDiscoveryMapSnapshot()
 
-    suspend fun openMapPoint(pointId: String): BackendProfile =
+    fun openMapPoint(pointId: String): BackendProfile =
         request(method = "GET", path = "/discover/points/$pointId").getJSONObject("profile").toProfile()
 
-    suspend fun likeProfile(profileId: String): BackendMatch? =
+    fun likeProfile(profileId: String): BackendMatch? =
         request(method = "POST", path = "/discover/profiles/$profileId/like").nullableObject("match_item")?.toMatch()
 
-    suspend fun passProfile(profileId: String) {
+    fun passProfile(profileId: String) {
         request(method = "POST", path = "/discover/profiles/$profileId/pass")
     }
 
-    suspend fun getActiveMatchDetail(): ActiveMatchSnapshot? =
+    fun getActiveMatchDetail(): ActiveMatchSnapshot? =
         request(method = "GET", path = "/matches/active/detail")
             .nullableObject("match_item")
             ?.toActiveMatchSnapshot()
 
-    suspend fun uploadFirstLoop(matchId: String, storageKey: String, durationMs: Int): BackendLoop =
+    fun uploadFirstLoop(matchId: String, storageKey: String, durationMs: Int): BackendLoop =
         request(
             method = "POST",
             path = "/matches/$matchId/loops",
@@ -141,14 +141,14 @@ class NowBackendApi(
                 .put("duration_ms", durationMs)
         ).getJSONObject("loop_item").toLoop()
 
-    suspend fun sendMessage(matchId: String, body: String): BackendMessage =
+    fun sendMessage(matchId: String, body: String): BackendMessage =
         request(
             method = "POST",
             path = "/matches/$matchId/messages",
             body = JSONObject().put("body", body)
         ).getJSONObject("message").toMessage()
 
-    suspend fun createMeetingProposal(
+    fun createMeetingProposal(
         matchId: String,
         placeName: String,
         proposedTime: String,
@@ -163,20 +163,20 @@ class NowBackendApi(
         return request(method = "POST", path = "/matches/$matchId/meeting-proposals", body = body).toMeetingProposal()
     }
 
-    suspend fun acceptMeetingProposal(matchId: String, proposalId: String): BackendMeetingProposal =
+    fun acceptMeetingProposal(matchId: String, proposalId: String): BackendMeetingProposal =
         request(
             method = "POST",
             path = "/matches/$matchId/meeting-proposals/$proposalId/accept"
         ).toMeetingProposal()
 
-    suspend fun updateMeetingStatus(matchId: String, status: String): BackendMeetingStatus =
+    fun updateMeetingStatus(matchId: String, status: String): BackendMeetingStatus =
         request(
             method = "POST",
             path = "/matches/$matchId/meeting-status",
             body = JSONObject().put("status", status)
         ).toMeetingStatus()
 
-    suspend fun confirmWeMet(matchId: String): BackendMatch =
+    fun confirmWeMet(matchId: String): BackendMatch =
         request(method = "POST", path = "/matches/$matchId/we-met").getJSONObject("match_item").toMatch()
 
     private fun request(

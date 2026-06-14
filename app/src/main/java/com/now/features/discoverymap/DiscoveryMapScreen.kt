@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,10 +34,14 @@ fun DiscoveryMapScreen(appState: AppState) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Ready today nearby", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Text("Choose carefully. One live match.", color = NowColors.inkSoft)
+                    appState.errorMessage?.let { Text(it, color = NowColors.inkSoft, fontSize = 12.sp) }
                 }
                 Button(onClick = { appState.goOffline() }) {
                     Text("Go Offline")
                 }
+            }
+            if (appState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp))
             }
             Text(
                 "Tap a point to open profile. Not Now disappears until tomorrow. Block disappears permanently.",

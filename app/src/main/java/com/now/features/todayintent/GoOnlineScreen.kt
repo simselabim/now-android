@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ fun GoOnlineScreen(appState: AppState) {
     ) {
         Text("One person at a time.", fontSize = 34.sp, fontWeight = FontWeight.Bold)
         Text("Go online when you are actually open to meet today. If you match, discovery pauses.", color = NowColors.inkSoft)
+        appState.errorMessage?.let { Text(it, color = NowColors.inkSoft, fontSize = 12.sp) }
         PlanPicker(appState)
         IntentPicker(appState)
         TimeWindowPicker(appState)
@@ -35,8 +38,16 @@ fun GoOnlineScreen(appState: AppState) {
             modifier = Modifier.fillMaxWidth().background(androidx.compose.ui.graphics.Color.White, RoundedCornerShape(8.dp)).padding(12.dp)
         )
         Spacer(Modifier.weight(1f))
-        Button(onClick = { appState.goOnline() }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-            Text("Go Online for today")
+        Button(
+            onClick = { appState.goOnline() },
+            enabled = !appState.isLoading,
+            modifier = Modifier.fillMaxWidth().height(52.dp)
+        ) {
+            if (appState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp).align(Alignment.CenterVertically))
+            } else {
+                Text("Go Online for today")
+            }
         }
     }
 }
