@@ -90,7 +90,8 @@ app/
 
 ## First Build Target
 
-Build a mock-driven navigation prototype first:
+The current app is a mock-driven navigation prototype with a backend API layer
+ready to wire into `AppState`:
 
 ```text
 Welcome
@@ -109,3 +110,66 @@ Welcome
 ```
 
 Do not port the web prototype. Use it only as product reference.
+
+## Backend API Layer
+
+The native API bridge lives in:
+
+```text
+app/src/main/java/com/now/core/api/
+  ApiEnvironment.kt
+  ApiError.kt
+  AuthTokenStore.kt
+  BackendModels.kt
+  NowBackendApi.kt
+```
+
+Local backend from the Android emulator:
+
+```text
+http://10.0.2.2:8080
+```
+
+Local backend from a device or desktop JVM context:
+
+```text
+http://127.0.0.1:8080
+```
+
+Start backend before wiring/running live data:
+
+```bash
+cd /Users/Sim_1/Documents/now/now_back
+make db-up
+make migrate
+make seed-demo
+make run
+```
+
+The Android client should start with:
+
+```text
+POST /auth/login
+GET  /app/bootstrap
+GET  /discover/map
+GET  /discover/points/{point_id}
+POST /discover/profiles/{profile_id}/like
+GET  /matches/active/detail
+POST /media/upload-intent
+POST /matches/{match_id}/loops
+POST /matches/{match_id}/messages
+POST /matches/{match_id}/meeting-proposals
+POST /matches/{match_id}/we-met
+```
+
+## Local Build Notes
+
+This repository currently does not include a Gradle wrapper. On a development
+machine, open the project in Android Studio or add a wrapper, then run:
+
+```bash
+./gradlew :app:assembleDebug
+```
+
+On this machine, Android build verification is blocked until Android Studio or
+the Android SDK/Gradle toolchain is installed.
